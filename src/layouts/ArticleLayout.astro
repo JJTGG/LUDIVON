@@ -1,0 +1,108 @@
+---
+import type { CollectionEntry } from "astro:content";
+import SiteLayout from "./SiteLayout.astro";
+
+type ArticleEntry =
+  | CollectionEntry<"androidGaming">
+  | CollectionEntry<"gameGuides">;
+
+interface Props {
+  entry: ArticleEntry;
+}
+
+const { entry } = Astro.props;
+const article = entry.data;
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+
+const displayUpdatedDate = article.updatedAt
+  ? formatDate(article.updatedAt)
+  : undefined;
+---
+
+<SiteLayout
+  title={`${article.title} | LUDIVON`}
+  description={article.description}
+>
+  <article class="article-shell shell">
+    <header class="article-header">
+      <a
+        class="article-back-link"
+        href={`/${article.section}/`}
+      >
+        &larr; Back to {article.section === "android-gaming"
+          ? "Android Gaming"
+          : "Game Guides"}
+      </a>
+
+      <p class="eyebrow article-section">
+        {article.section === "android-gaming"
+          ? "ANDROID GAMING"
+          : "GAME GUIDES"}
+      </p>
+
+      <h1>{article.title}</h1>
+
+      <p class="article-description">
+        {article.description}
+      </p>
+
+      <div class="article-metadata">
+        <span>
+          Published
+          <time datetime={article.publishedAt.toISOString()}>
+            {formatDate(article.publishedAt)}
+          </time>
+        </span>
+
+        {displayUpdatedDate && (
+          <span>
+            Updated {displayUpdatedDate}
+          </span>
+        )}
+
+        <span>
+          Verified {formatDate(article.lastVerified)}
+        </span>
+      </div>
+
+      {article.tags.length > 0 && (
+        <ul class="article-tags" aria-label="Article topics">
+          {article.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      )}
+    </header>
+
+    <aside class="testing-disclosure">
+      <strong>Testing and verification:</strong>
+      <p>{article.testingDisclosure}</p>
+    </aside>
+
+    <div class="article-content prose" data-pagefind-body>
+      <slot />
+    </div>
+
+    {article.sources.length > 0 && (
+      <section class="article-sources">
+        <h2>Sources and further reading</h2>
+
+        <ol>
+          {article.sources.map((source) => (
+            <li>
+              <a href={source} target="_blank" rel="noopener noreferrer">
+                {source}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+  </article>
+</SiteLayout>
