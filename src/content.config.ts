@@ -1,6 +1,27 @@
-import { defineCollection } from "astro:content";
+import { defineCollection, reference } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
+
+const authors = defineCollection({
+  loader: glob({
+    base: "./src/content/authors",
+    pattern: "**/*.md"
+  }),
+  schema: z.object({
+    name: z.string().trim().min(1),
+
+    description: z.string().trim().min(1),
+
+    website: z.httpUrl().optional(),
+
+    status: z
+      .enum([
+        "draft",
+        "published"
+      ])
+      .default("draft")
+  })
+});
 
 const contentTypes = [
   "how-to",
@@ -27,7 +48,7 @@ const createArticleSchema = (
 
       tags: z.array(z.string().trim().min(1)).default([]),
 
-      authorId: z.string().trim().min(1),
+      authorId: reference("authors"),
 
       publishedAt: z.coerce.date().optional(),
 
@@ -114,6 +135,7 @@ const gameGuides = defineCollection({
 });
 
 export const collections = {
+  authors,
   androidGaming,
   gameGuides
 };
