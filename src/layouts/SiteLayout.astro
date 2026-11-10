@@ -6,11 +6,13 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  indexContent?: boolean;
 }
 
 const {
   title = "LUDIVON — Gaming & Technology Guides",
-  description = "Understand your tech. Play smarter. Practical Android gaming and game-specific guides."
+  description = "Understand your tech. Play smarter. Practical Android gaming and game-specific guides.",
+  indexContent = true
 } = Astro.props;
 
 const indexingEnabled =
@@ -56,7 +58,10 @@ const robotsContent = indexingEnabled
 
     <SiteHeader />
 
-    <main id="main-content">
+    <main
+      id="main-content"
+      data-pagefind-body={indexContent ? true : undefined}
+    >
       <slot />
     </main>
 
