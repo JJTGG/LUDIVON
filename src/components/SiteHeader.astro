@@ -7,10 +7,120 @@
       </span>
     </a>
 
-    <nav class="primary-nav" aria-label="Primary navigation">
+    <nav class="primary-nav desktop-nav" aria-label="Primary navigation">
       <a href="/android-gaming/">Android Gaming</a>
       <a href="/game-guides/">Game Guides</a>
       <a href="/search/">Search</a>
     </nav>
+
+    <details class="mobile-nav">
+      <summary aria-label="Open navigation menu">
+        <span>Menu</span>
+      </summary>
+
+      <nav class="mobile-nav-panel" aria-label="Mobile navigation">
+        <a href="/android-gaming/">Android Gaming</a>
+        <a href="/game-guides/">Game Guides</a>
+        <a href="/search/">Search</a>
+        <a href="/about/">About LUDIVON</a>
+      </nav>
+    </details>
   </div>
 </header>
+
+<style>
+  .mobile-nav {
+    display: none;
+  }
+
+  .mobile-nav summary {
+    display: flex;
+    min-width: 76px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    list-style: none;
+  }
+
+  .mobile-nav summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-nav summary::after {
+    content: "+";
+    color: var(--color-teal);
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .mobile-nav[open] summary::after {
+    content: "−";
+  }
+
+  .mobile-nav summary:focus-visible,
+  .mobile-nav-panel a:focus-visible {
+    outline: 3px solid var(--color-teal);
+    outline-offset: 3px;
+  }
+
+  .mobile-nav-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 20;
+    display: grid;
+    width: min(260px, calc(100vw - 36px));
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    box-shadow: 0 10px 30px rgb(23 33 43 / 10%);
+  }
+
+  .mobile-nav-panel a {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 9px 12px;
+    border-radius: 4px;
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .mobile-nav-panel a:hover {
+    background: #F0F4F5;
+    color: var(--color-teal);
+  }
+
+  @media (max-width: 640px) {
+    .header-inner {
+      position: relative;
+      min-height: 76px;
+      align-items: center;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 12px;
+      padding-block: 14px;
+    }
+
+    .desktop-nav {
+      display: none;
+    }
+
+    .mobile-nav {
+      display: block;
+    }
+  }
+</style>
