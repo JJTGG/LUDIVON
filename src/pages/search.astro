@@ -1,0 +1,61 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout
+  title="Search | LUDIVON"
+  description="Search LUDIVON's Android gaming and game-specific guides."
+>
+  <section class="search-shell shell">
+    <p class="eyebrow">LUDIVON / SEARCH</p>
+
+    <h1>Find what you need.</h1>
+
+    <p class="search-intro">
+      Search practical guides, troubleshooting advice,
+      Android gaming topics and game-specific information.
+    </p>
+
+    <link
+      rel="stylesheet"
+      href="/pagefind/pagefind-ui.css"
+    />
+
+    <div id="site-search"></div>
+  </section>
+
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchContainer = document.querySelector("#site-search");
+
+      if (!searchContainer) {
+        return;
+      }
+
+      const pagefindScript = document.createElement("script");
+
+      pagefindScript.src = "/pagefind/pagefind-ui.js";
+      pagefindScript.async = true;
+
+      pagefindScript.onload = () => {
+        const PagefindUI = window.PagefindUI;
+
+        if (typeof PagefindUI === "function") {
+          new PagefindUI({
+            element: "#site-search",
+            showSubResults: true,
+            showImages: false,
+            showEmptyFilters: false
+          });
+        }
+      };
+
+      pagefindScript.onerror = () => {
+        searchContainer.textContent =
+          "Search is temporarily unavailable. Please try again later.";
+      };
+
+      document.head.appendChild(pagefindScript);
+    });
+  </script>
+</SiteLayout>
