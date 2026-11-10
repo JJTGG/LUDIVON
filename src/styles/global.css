@@ -624,15 +624,38 @@ svg {
   color: var(--color-muted);
 }
 
-.pagefind-ui {
-  --pagefind-ui-primary: var(--color-teal);
-  --pagefind-ui-text: var(--color-ink);
-  --pagefind-ui-background: var(--color-surface);
-  --pagefind-ui-border: var(--color-border);
-  --pagefind-ui-tag: #EAF0F2;
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 5px;
-  --pagefind-ui-font: var(--font-sans);
+.search-interface {
+  --pf-text: var(--color-ink);
+  --pf-text-secondary: var(--color-muted);
+  --pf-text-muted: var(--color-muted);
+  --pf-background: var(--color-surface);
+  --pf-border: var(--color-border);
+  --pf-border-focus: var(--color-teal);
+  --pf-hover: #F0F4F5;
+  --pf-mark: var(--color-teal);
+  --pf-outline-focus: var(--color-teal);
+  --pf-outline-width: 2px;
+  --pf-outline-offset: 2px;
+  --pf-font: var(--font-sans);
+  --pf-input-height: 48px;
+  --pf-input-font-size: 16px;
+  --pf-summary-font-size: 0.85rem;
+  --pf-result-title-font-size: 1rem;
+  --pf-result-excerpt-font-size: 0.9rem;
+  --pf-border-radius: 5px;
+  --pf-results-gap: 14px;
+}
+
+.search-interface pagefind-input,
+.search-interface pagefind-summary,
+.search-interface pagefind-results {
+  display: block;
+}
+
+.search-interface pagefind-summary {
+  margin-block: 18px;
+  color: var(--color-muted);
+  font-size: 0.85rem;
 }
 
 /* Footer */
