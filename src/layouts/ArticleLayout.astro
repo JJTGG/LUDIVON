@@ -17,12 +17,36 @@ const formatDate = (date: Date) =>
   date.toLocaleDateString("en", {
     day: "numeric",
     month: "long",
-    year: "numeric"
+    year: "numeric",
+    timeZone: "UTC"
   });
 
-const displayUpdatedDate = article.updatedAt
-  ? formatDate(article.updatedAt)
-  : undefined;
+const formatLabel = (value: string) =>
+  value
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+const readingText = entry.body
+  .replace(/```[\s\S]*?```/g, " ")
+  .replace(/`[^`]*`/g, " ")
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+  .replace(/<[^>]*>/g, " ")
+  .replace(/[#>*_~|]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const wordCount = readingText
+  ? readingText.split(" ").filter(Boolean).length
+  : 0;
+
+const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 220));
+
+const sectionTitle =
+  article.section === "android-gaming"
+    ? "Android Gaming"
+    : "Game Guides";
 ---
 
 <SiteLayout
@@ -30,20 +54,27 @@ const displayUpdatedDate = article.updatedAt
   description={article.description}
 >
   <article class="article-shell shell">
-    <header class="article-header">
-      <a
-        class="article-back-link"
-        href={`/${article.section}/`}
-      >
-        &larr; Back to {article.section === "android-gaming"
-          ? "Android Gaming"
-          : "Game Guides"}
-      </a>
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li>
+          <a href="/">Home</a>
+        </li>
 
+        <li>
+          <a href={`/${article.section}/`}>{sectionTitle}</a>
+        </li>
+
+        <li>
+          <span aria-current="page">{article.title}</span>
+        </li>
+      </ol>
+    </nav>
+
+    <header class="article-header">
       <p class="eyebrow article-section">
-        {article.section === "android-gaming"
-          ? "ANDROID GAMING"
-          : "GAME GUIDES"}
+        {sectionTitle}
+        <span aria-hidden="true"> / </span>
+        {formatLabel(article.contentType)}
       </p>
 
       <h1>{article.title}</h1>
@@ -53,22 +84,34 @@ const displayUpdatedDate = article.updatedAt
       </p>
 
       <div class="article-metadata">
-        <span>
-          Published
-          <time datetime={article.publishedAt.toISOString()}>
-            {formatDate(article.publishedAt)}
-          </time>
-        </span>
-
-        {displayUpdatedDate && (
+        {article.publishedAt && (
           <span>
-            Updated {displayUpdatedDate}
+            Published
+            <time datetime={article.publishedAt.toISOString()}>
+              {formatDate(article.publishedAt)}
+            </time>
           </span>
         )}
 
-        <span>
-          Verified {formatDate(article.lastVerified)}
-        </span>
+        {article.updatedAt && (
+          <span>
+            Updated
+            <time datetime={article.updatedAt.toISOString()}>
+              {formatDate(article.updatedAt)}
+            </time>
+          </span>
+        )}
+
+        {article.lastVerified && (
+          <span>
+            Last verified
+            <time datetime={article.lastVerified.toISOString()}>
+              {formatDate(article.lastVerified)}
+            </time>
+          </span>
+        )}
+
+        <span>{readingTimeMinutes} min read</span>
       </div>
 
       {article.tags.length > 0 && (
@@ -80,8 +123,43 @@ const displayUpdatedDate = article.updatedAt
       )}
     </header>
 
+    {(article.game ||
+      article.gameVersion ||
+      article.androidVersions?.length ||
+      article.deviceApplicability) && (
+      <dl class="article-applicability">
+        {article.game && (
+          <div>
+            <dt>Game</dt>
+            <dd>{article.game}</dd>
+          </div>
+        )}
+
+        {article.gameVersion && (
+          <div>
+            <dt>Game version</dt>
+            <dd>{article.gameVersion}</dd>
+          </div>
+        )}
+
+        {article.androidVersions?.length && (
+          <div>
+            <dt>Android versions</dt>
+            <dd>{article.androidVersions.join(", ")}</dd>
+          </div>
+        )}
+
+        {article.deviceApplicability && (
+          <div>
+            <dt>Device applicability</dt>
+            <dd>{article.deviceApplicability}</dd>
+          </div>
+        )}
+      </dl>
+    )}
+
     <aside class="testing-disclosure">
-      <strong>Testing and verification:</strong>
+      <strong>Testing and verification</strong>
       <p>{article.testingDisclosure}</p>
     </aside>
 
@@ -90,8 +168,8 @@ const displayUpdatedDate = article.updatedAt
     </div>
 
     {article.sources.length > 0 && (
-      <section class="article-sources">
-        <h2>Sources and further reading</h2>
+      <section class="article-sources" aria-labelledby="article-sources-heading">
+        <h2 id="article-sources-heading">Sources and further reading</h2>
 
         <ol>
           {article.sources.map((source) => (
@@ -110,3 +188,84 @@ const displayUpdatedDate = article.updatedAt
     )}
   </article>
 </SiteLayout>
+
+<style>
+  .article-breadcrumb {
+    margin-bottom: 30px;
+    color: var(--color-muted);
+    font-size: 0.83rem;
+  }
+
+  .article-breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .article-breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .article-breadcrumb li:not(:last-child)::after {
+    color: #91A0AD;
+    content: "/";
+  }
+
+  .article-breadcrumb a {
+    color: var(--color-teal);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .article-breadcrumb a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .article-breadcrumb [aria-current="page"] {
+    overflow-wrap: anywhere;
+    color: var(--color-muted);
+  }
+
+  .article-applicability {
+    display: grid;
+    gap: 14px;
+    margin: 28px 0;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+  }
+
+  .article-applicability > div {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.34fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .article-applicability dt {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .article-applicability dd {
+    margin: 0;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 480px) {
+    .article-applicability > div {
+      grid-template-columns: 1fr;
+      gap: 3px;
+    }
+  }
+</style>
