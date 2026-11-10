@@ -1,0 +1,105 @@
+---
+import SiteLayout from "./SiteLayout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow?: string;
+}
+
+const {
+  title,
+  description,
+  eyebrow = "PUBLICATION"
+} = Astro.props;
+---
+
+<SiteLayout
+  title={`${title} | LUDIVON`}
+  description={description}
+  indexContent={false}
+>
+  <section class="page-heading">
+    <div class="shell">
+      <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">LUDIVON</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{title}</span>
+      </nav>
+
+      <p class="eyebrow">LUDIVON / {eyebrow}</p>
+
+      <h1>{title}</h1>
+
+      <p class="page-description">{description}</p>
+    </div>
+  </section>
+
+  <section class="static-page-shell shell">
+    <div class="static-page-content prose">
+      <slot />
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  .page-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 26px;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+  }
+
+  .page-breadcrumb a {
+    color: var(--color-teal);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .page-breadcrumb a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .page-description {
+    max-width: 680px;
+    margin: 18px 0 0;
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .static-page-shell {
+    max-width: var(--article-width);
+    padding-block: 42px 88px;
+  }
+
+  .static-page-content > :first-child {
+    margin-top: 0;
+  }
+
+  .static-page-content > :last-child {
+    margin-bottom: 0;
+  }
+
+  .static-page-content :global(.prelaunch-note) {
+    margin-block: 0 30px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--color-amber);
+    background: #FFF9EF;
+    color: var(--color-ink);
+    font-size: 0.94rem;
+    line-height: 1.7;
+  }
+
+  .static-page-content :global(.prelaunch-note p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .static-page-content :global(.policy-list li) {
+    margin-block: 0.65em;
+  }
+</style>
