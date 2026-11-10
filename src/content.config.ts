@@ -2,57 +2,107 @@ import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 
-const baseArticleSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
+const contentTypes = [
+  "how-to",
+  "troubleshooting",
+  "performance-optimization",
+  "game-settings",
+  "device-compatibility",
+  "walkthrough",
+  "technology-explainer"
+] as const;
 
-  section: z.enum([
-    "android-gaming",
-    "game-guides"
-  ]),
+const createArticleSchema = (
+  section: "android-gaming" | "game-guides"
+) =>
+  z
+    .object({
+      title: z.string().trim().min(1),
 
-  contentType: z.string().min(1),
+      description: z.string().trim().min(1),
 
-  tags: z.array(z.string()).default([]),
+      section: z.literal(section),
 
-  authorId: z.string().min(1),
+      contentType: z.enum(contentTypes),
 
-  publishedAt: z.coerce.date(),
+      tags: z.array(z.string().trim().min(1)).default([]),
 
-  updatedAt: z.coerce.date().optional(),
+      authorId: z.string().trim().min(1),
 
-  lastVerified: z.coerce.date(),
+      publishedAt: z.coerce.date().optional(),
 
-  game: z.string().optional(),
+      updatedAt: z.coerce.date().optional(),
 
-  gameVersion: z.string().optional(),
+      lastVerified: z.coerce.date().optional(),
 
-  androidVersions: z.array(z.string()).optional(),
+      game: z.string().trim().min(1).optional(),
 
-  deviceApplicability: z.string().optional(),
+      gameVersion: z.string().trim().min(1).optional(),
 
-  testingDisclosure: z.string().min(1),
+      androidVersions: z
+        .array(z.string().trim().min(1))
+        .optional(),
 
-  sources: z.array(z.httpUrl()).default([]),
+      deviceApplicability: z.string().trim().min(1).optional(),
 
-  coverImage: z.string().optional(),
+      testingDisclosure: z.string().trim().min(1),
 
-  status: z.enum([
-    "draft",
-    "review",
-    "published",
-    "archived"
-  ]).default("draft")
-});
+      sources: z.array(z.httpUrl()).default([]),
+
+      coverImage: z
+        .object({
+          src: z.string().trim().min(1),
+          alt: z.string().trim().min(1)
+        })
+        .optional(),
+
+      status: z
+        .enum([
+          "draft",
+          "review",
+          "published",
+          "archived"
+        ])
+        .default("draft")
+    })
+    .superRefine((article, context) => {
+      if (article.status === "published") {
+        if (!article.publishedAt) {
+          context.addIssue({
+            code: "custom",
+            path: ["publishedAt"],
+            message: "Published articles must provide a publication date."
+          });
+        }
+
+        if (!article.updatedAt) {
+          context.addIssue({
+            code: "custom",
+            path: ["updatedAt"],
+            message: "Published articles must provide an update date."
+          });
+        }
+      }
+
+      if (
+        article.publishedAt &&
+        article.updatedAt &&
+        article.updatedAt < article.publishedAt
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["updatedAt"],
+          message: "The update date cannot be earlier than the publication date."
+        });
+      }
+    });
 
 const androidGaming = defineCollection({
   loader: glob({
     base: "./src/content/android-gaming",
     pattern: "**/*.{md,mdx}"
   }),
-  schema: baseArticleSchema.extend({
-    section: z.literal("android-gaming")
-  })
+  schema: createArticleSchema("android-gaming")
 });
 
 const gameGuides = defineCollection({
@@ -60,9 +110,7 @@ const gameGuides = defineCollection({
     base: "./src/content/game-guides",
     pattern: "**/*.{md,mdx}"
   }),
-  schema: baseArticleSchema.extend({
-    section: z.literal("game-guides")
-  })
+  schema: createArticleSchema("game-guides")
 });
 
 export const collections = {
