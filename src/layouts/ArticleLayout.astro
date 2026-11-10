@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { getEntry, type CollectionEntry } from "astro:content";
 import SiteLayout from "./SiteLayout.astro";
 
 type ArticleEntry =
@@ -12,6 +12,14 @@ interface Props {
 
 const { entry } = Astro.props;
 const article = entry.data;
+
+const author = await getEntry(article.authorId);
+
+if (!author || author.data.status !== "published") {
+  throw new Error(
+    `Published article "${entry.id}" must reference an existing published author record.`
+  );
+}
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en", {
@@ -84,6 +92,13 @@ const sectionTitle =
       </p>
 
       <div class="article-metadata">
+        <span class="article-byline">
+          By
+          <a href={`/authors/${author.id}/`}>
+            {author.data.name}
+          </a>
+        </span>
+
         {article.publishedAt && (
           <span>
             Published
@@ -232,6 +247,18 @@ const sectionTitle =
   .article-breadcrumb [aria-current="page"] {
     overflow-wrap: anywhere;
     color: var(--color-muted);
+  }
+
+  .article-byline a {
+    margin-left: 4px;
+    color: var(--color-teal);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .article-byline a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .article-applicability {
