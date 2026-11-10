@@ -85,7 +85,7 @@ const displayUpdatedDate = article.updatedAt
       <p>{article.testingDisclosure}</p>
     </aside>
 
-    <div class="article-content prose" data-pagefind-body>
+    <div class="article-content prose">
       <slot />
     </div>
 
@@ -96,7 +96,11 @@ const displayUpdatedDate = article.updatedAt
         <ol>
           {article.sources.map((source) => (
             <li>
-              <a href={source} target="_blank" rel="noopener noreferrer">
+              <a
+                href={source}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {source}
               </a>
             </li>
