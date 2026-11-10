@@ -9,8 +9,17 @@ const articles = (
   )
 ).sort(
   (a, b) =>
-    b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
+    (b.data.publishedAt?.getTime() ?? 0) -
+    (a.data.publishedAt?.getTime() ?? 0)
 );
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  });
 ---
 
 <SiteLayout
@@ -41,12 +50,15 @@ const articles = (
           >
             <span class="article-card-meta">
               {article.data.game ?? "Game guide"}
-              &nbsp; · &nbsp;
-              {article.data.publishedAt.toLocaleDateString("en", {
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-              })}
+
+              {article.data.publishedAt && (
+                <>
+                  &nbsp; · &nbsp;
+                  <time datetime={article.data.publishedAt.toISOString()}>
+                    {formatDate(article.data.publishedAt)}
+                  </time>
+                </>
+              )}
             </span>
 
             <h2>{article.data.title}</h2>
