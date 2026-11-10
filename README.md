@@ -1,4 +1,3 @@
-
 # LUDIVON
 
 **Gaming & Technology Guides**
@@ -87,24 +86,37 @@ Search assets are generated under:
 
 `dist/pagefind/`
 
+The Pagefind Component UI is used for the public search interface.
+
+The shared site layout defines the content boundary that Pagefind indexes. Navigation, footer content and pages explicitly excluded from indexing are not included in the search index.
+
 ## Indexing and launch safeguards
 
-Search engine indexing is disabled during development.
+Search engine indexing is disabled during development and pre-launch preparation.
 
-The repository currently includes:
+The current configuration includes:
 
-- A restrictive `robots.txt`
-- A global `X-Robots-Tag: noindex, nofollow` header
-- No sitemap generation by default
+- A crawlable `robots.txt`, allowing compliant search engines to read page indexing directives.
+- A global `X-Robots-Tag: noindex, nofollow` response header.
+- Matching `noindex, nofollow` page metadata.
+- No sitemap generation by default.
 
-Public indexing must not be enabled until the publication has passed its launch-readiness checks.
+Public indexing must not be enabled until the publication has passed its launch-readiness checks and public indexing has been separately approved.
 
-To generate a sitemap, configure both:
+To enable sitemap generation and indexable page metadata, configure both:
 
 - `SITE_URL`
 - `PUBLIC_INDEXING_ENABLED=true`
 
-The noindex header and restrictive robots policy must also be updated through the approved launch process.
+Before public indexing:
+
+- Confirm the permanent production URL.
+- Remove or update the global noindex response header.
+- Review the robots.txt policy.
+- Verify canonical URLs and the generated sitemap.
+- Confirm public launch approval.
+
+The development and pre-launch environment must retain its noindex protections.
 
 ## Architecture principles
 
