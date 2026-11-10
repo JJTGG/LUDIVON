@@ -1,22 +1,36 @@
 <footer class="site-footer" data-pagefind-ignore>
-  <div class="shell footer-inner">
+  <div class="shell footer-shell">
     <div class="footer-brand">
       <a class="footer-wordmark" href="/">LUDIVON</a>
 
-      <p>
-        Understand your tech. Play smarter.
-      </p>
+      <p>Understand your tech. Play smarter.</p>
 
       <p class="publisher-note">
         An independent publication from TGG HUB.
       </p>
     </div>
 
-    <nav class="footer-nav" aria-label="Footer navigation">
-      <a href="/android-gaming/">Android Gaming</a>
-      <a href="/game-guides/">Game Guides</a>
-      <a href="/search/">Search</a>
-    </nav>
+    <div class="footer-navigation">
+      <nav class="footer-nav" aria-label="Explore LUDIVON">
+        <h2>Explore</h2>
+
+        <a href="/android-gaming/">Android Gaming</a>
+        <a href="/game-guides/">Game Guides</a>
+        <a href="/search/">Search</a>
+      </nav>
+
+      <nav class="footer-nav" aria-label="Publication information">
+        <h2>Publication</h2>
+
+        <a href="/about/">About</a>
+        <a href="/editorial-standards/">Editorial Standards</a>
+        <a href="/corrections/">Corrections</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+        <a href="/advertising-disclosure/">Advertising Disclosure</a>
+      </nav>
+    </div>
 
     <div class="footer-bottom">
       <p>
@@ -30,3 +44,71 @@
     </div>
   </div>
 </footer>
+
+<style>
+  .footer-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+    gap: 36px;
+    padding-block: 42px 24px;
+  }
+
+  .footer-navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+
+  .footer-nav {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 9px;
+  }
+
+  .footer-nav h2 {
+    margin: 0 0 5px;
+    color: var(--color-ink);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .footer-nav a {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-decoration: none;
+  }
+
+  .footer-nav a:hover {
+    color: var(--color-teal);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .footer-bottom {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 700px) {
+    .footer-shell {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .footer-navigation {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .footer-bottom {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .footer-navigation {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
