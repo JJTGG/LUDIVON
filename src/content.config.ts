@@ -33,7 +33,7 @@ const baseArticleSchema = z.object({
 
   testingDisclosure: z.string().min(1),
 
-  sources: z.array(z.string().url()).default([]),
+  sources: z.array(z.httpUrl()).default([]),
 
   coverImage: z.string().optional(),
 
