@@ -9,8 +9,23 @@ const articles = (
   )
 ).sort(
   (a, b) =>
-    b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
+    (b.data.publishedAt?.getTime() ?? 0) -
+    (a.data.publishedAt?.getTime() ?? 0)
 );
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  });
+
+const formatContentType = (value: string) =>
+  value
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 ---
 
 <SiteLayout
@@ -40,13 +55,16 @@ const articles = (
             href={`/android-gaming/${article.id}/`}
           >
             <span class="article-card-meta">
-              {article.data.contentType}
-              &nbsp; · &nbsp;
-              {article.data.publishedAt.toLocaleDateString("en", {
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-              })}
+              {formatContentType(article.data.contentType)}
+
+              {article.data.publishedAt && (
+                <>
+                  &nbsp; · &nbsp;
+                  <time datetime={article.data.publishedAt.toISOString()}>
+                    {formatDate(article.data.publishedAt)}
+                  </time>
+                </>
+              )}
             </span>
 
             <h2>{article.data.title}</h2>
