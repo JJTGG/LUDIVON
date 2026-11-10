@@ -1,0 +1,85 @@
+---
+import { getCollection, render } from "astro:content";
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+export async function getStaticPaths() {
+  const authors = await getCollection(
+    "authors",
+    ({ data }) => data.status === "published"
+  );
+
+  return authors.map((author) => ({
+    params: {
+      slug: author.id
+    },
+    props: {
+      author
+    }
+  }));
+}
+
+const { author } = Astro.props;
+const { Content } = await render(author);
+---
+
+<SiteLayout
+  title={`${author.data.name} | LUDIVON`}
+  description={author.data.description}
+>
+  <section class="page-heading author-heading">
+    <div class="shell">
+      <p class="eyebrow">LUDIVON / AUTHOR PROFILE</p>
+
+      <h1>{author.data.name}</h1>
+
+      <p class="author-description">
+        {author.data.description}
+      </p>
+    </div>
+  </section>
+
+  <article class="author-profile shell">
+    <div class="author-profile-content prose">
+      <Content />
+    </div>
+
+    {author.data.website && (
+      <p class="author-website">
+        <a
+          href={author.data.website}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Visit website
+        </a>
+      </p>
+    )}
+  </article>
+</SiteLayout>
+
+<style>
+  .author-description {
+    max-width: 680px;
+    margin: 18px 0 0;
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .author-profile {
+    max-width: var(--article-width);
+    padding-block: 42px 88px;
+  }
+
+  .author-profile-content > :first-child {
+    margin-top: 0;
+  }
+
+  .author-website {
+    margin-top: 34px;
+    padding-top: 22px;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+</style>
