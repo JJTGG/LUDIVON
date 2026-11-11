@@ -1,97 +1,1113 @@
 ---
+import { getCollection } from "astro:content";
 import SiteLayout from "../layouts/SiteLayout.astro";
+
+const [androidArticles, gameArticles] = await Promise.all([
+  getCollection(
+    "androidGaming",
+    ({ data }) => data.status === "published"
+  ),
+  getCollection(
+    "gameGuides",
+    ({ data }) => data.status === "published"
+  )
+]);
+
+const publishedArticles = [
+  ...androidArticles,
+  ...gameArticles
+].sort((a, b) => {
+  const aDate = a.data.publishedAt?.getTime() ?? 0;
+  const bDate = b.data.publishedAt?.getTime() ?? 0;
+
+  if (bDate !== aDate) {
+    return bDate - aDate;
+  }
+
+  return a.data.title.localeCompare(b.data.title);
+});
+
+const latestArticles = publishedArticles.slice(0, 4);
+
+const androidCount = androidArticles.length;
+const gameCount = gameArticles.length;
+const totalCount = publishedArticles.length;
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC"
+  });
+
+const formatLabel = (value: string) =>
+  value
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 ---
 
 <SiteLayout>
-  <section class="home-hero shell">
-    <div class="hero-copy">
-      <p class="eyebrow">Gaming &amp; Technology Guides</p>
+  <section class="home-intro shell">
+    <div class="home-intro-copy">
+      <p class="eyebrow">LUDIVON / GAMING &amp; TECHNOLOGY</p>
 
       <h1>
         Understand your tech.
         <span>Play smarter.</span>
       </h1>
 
-      <p class="hero-description">
-        Clear, practical guides for getting more from Android
-        gaming. Understand performance, make better settings
-        choices, solve problems and get back to playing.
+      <p class="home-intro-description">
+        Better gaming starts with understanding your device.
+        Explore practical Android gaming advice, solve technical
+        problems and make more informed decisions about the
+        games you play.
       </p>
 
-      <div class="hero-actions">
-        <a class="button-primary" href="/android-gaming/">
+      <div class="home-actions">
+        <a class="home-action-primary" href="/android-gaming/">
           Explore Android Gaming
+          <span aria-hidden="true">→</span>
         </a>
 
-        <a class="button-secondary" href="/game-guides/">
+        <a class="home-action-secondary" href="/game-guides/">
           Browse Game Guides
         </a>
       </div>
+
+      <div class="home-intro-note">
+        <span class="home-note-marker" aria-hidden="true"></span>
+        <p>
+          Practical guidance for budget and mid-range Android devices.
+        </p>
+      </div>
     </div>
 
-    <aside class="feature-panel">
-      <p class="eyebrow">The LUDIVON approach</p>
+    <aside class="home-editorial-panel">
+      <div class="home-panel-topline">
+        <span>THE LUDIVON APPROACH</span>
+        <span>01 / 03</span>
+      </div>
 
-      <h2>Useful knowledge. Better gaming decisions.</h2>
+      <div class="home-panel-main">
+        <p class="home-panel-overline">Not just another gaming page</p>
 
-      <p>
-        Technology advice should help you understand what to do,
-        why it matters and where its limitations are.
-      </p>
+        <h2>
+          Know what your device can do.
+          Understand what it cannot.
+        </h2>
 
-      <ul class="feature-list">
-        <li>Android gaming performance and optimisation</li>
-        <li>Settings, compatibility and troubleshooting</li>
-        <li>Practical guides for individual games</li>
-        <li>Clear distinctions between tested facts and guidance</li>
-      </ul>
+        <p>
+          We focus on useful explanations, realistic guidance
+          and the details that make technical advice applicable
+          to your actual device.
+        </p>
+      </div>
+
+      <div class="home-panel-principles">
+        <div>
+          <span>01</span>
+          <p>Understand performance</p>
+        </div>
+
+        <div>
+          <span>02</span>
+          <p>Make informed settings choices</p>
+        </div>
+
+        <div>
+          <span>03</span>
+          <p>Troubleshoot with context</p>
+        </div>
+      </div>
+
+      <div class="home-panel-bottom">
+        <span>INDEPENDENT PUBLICATION</span>
+        <span>FROM TGG HUB</span>
+      </div>
     </aside>
   </section>
 
-  <section class="content-section shell">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Explore the library</p>
-        <h2>Find the guidance you need.</h2>
+  <section class="home-library-section">
+    <div class="shell">
+      <div class="home-section-heading">
+        <div>
+          <p class="eyebrow">THE LIBRARY</p>
+          <h2>Guidance worth keeping.</h2>
+        </div>
+
+        <a href="/search/" class="home-text-link">
+          Search LUDIVON
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <p>
-        Start with Android gaming fundamentals or go directly
-        to practical guides for individual games.
+      {latestArticles.length > 0 ? (
+        <div class="home-article-grid">
+          {latestArticles.map((article, index) => (
+            <a
+              class={`home-article-card ${index === 0 ? "home-article-card-featured" : ""}`}
+              href={`/${article.data.section}/${article.id}/`}
+            >
+              <div class="home-article-card-top">
+                <span class="home-article-number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <span class="home-article-section">
+                  {article.data.section === "android-gaming"
+                    ? "ANDROID GAMING"
+                    : "GAME GUIDE"}
+                </span>
+              </div>
+
+              <div class="home-article-card-content">
+                <p class="home-article-type">
+                  {formatLabel(article.data.contentType)}
+                  {article.data.game && ` / ${article.data.game}`}
+                </p>
+
+                <h3>{article.data.title}</h3>
+
+                <p class="home-article-description">
+                  {article.data.description}
+                </p>
+              </div>
+
+              <div class="home-article-card-bottom">
+                {article.data.publishedAt && (
+                  <time datetime={article.data.publishedAt.toISOString()}>
+                    {formatDate(article.data.publishedAt)}
+                  </time>
+                )}
+
+                <span class="home-article-read">
+                  Read guide <span aria-hidden="true">→</span>
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="home-library-empty">
+          <div class="home-empty-index">01</div>
+
+          <div class="home-empty-content">
+            <p class="eyebrow">FIRST EDITION IN PROGRESS</p>
+
+            <h3>The library is taking shape.</h3>
+
+            <p>
+              We are preparing the first guides. Each article
+              will go through research, verification and
+              editorial review before publication.
+            </p>
+
+            <a href="/editorial-standards/" class="home-text-link">
+              How we prepare our guides
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+
+          <div class="home-empty-status">
+            <span class="home-status-dot"></span>
+            <span>CONTENT PREPARATION</span>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="home-categories shell">
+    <div class="home-section-heading">
+      <div>
+        <p class="eyebrow">EXPLORE BY INTEREST</p>
+        <h2>Start with what you need.</h2>
+      </div>
+
+      <p class="home-section-description">
+        Two focused libraries. Different questions.
+        One practical approach.
       </p>
     </div>
 
-    <div class="category-grid">
-      <a class="category-card" href="/android-gaming/">
-        <span class="category-number">01 / ANDROID</span>
+    <div class="home-category-grid">
+      <a href="/android-gaming/" class="home-category-card">
+        <div class="home-category-top">
+          <span class="home-category-index">01</span>
+          <span class="home-category-count">
+            {androidCount} {androidCount === 1 ? "GUIDE" : "GUIDES"}
+          </span>
+        </div>
 
-        <h3>Android Gaming</h3>
+        <div>
+          <p class="home-category-kicker">YOUR DEVICE, UNDERSTOOD</p>
 
-        <p>
-          Understand performance, device compatibility,
-          settings, optimisation and common gaming problems
-          on Android.
-        </p>
+          <h3>Android Gaming</h3>
 
-        <span class="category-link-label">
-          Explore Android Gaming &rarr;
+          <p>
+            Performance, optimisation, compatibility,
+            device settings and troubleshooting.
+          </p>
+        </div>
+
+        <span class="home-category-link">
+          Explore Android Gaming
+          <span aria-hidden="true">→</span>
         </span>
       </a>
 
-      <a class="category-card" href="/game-guides/">
-        <span class="category-number">02 / GAMES</span>
+      <a href="/game-guides/" class="home-category-card home-category-game">
+        <div class="home-category-top">
+          <span class="home-category-index">02</span>
+          <span class="home-category-count">
+            {gameCount} {gameCount === 1 ? "GUIDE" : "GUIDES"}
+          </span>
+        </div>
 
-        <h3>Game Guides</h3>
+        <div>
+          <p class="home-category-kicker">HELP FOR THE GAMES YOU PLAY</p>
 
-        <p>
-          Find game-specific help, practical explanations,
-          gameplay guidance and settings recommendations.
-        </p>
+          <h3>Game Guides</h3>
 
-        <span class="category-link-label">
-          Explore Game Guides &rarr;
+          <p>
+            Game-specific tutorials, settings advice,
+            walkthroughs and practical solutions.
+          </p>
+        </div>
+
+        <span class="home-category-link">
+          Explore Game Guides
+          <span aria-hidden="true">→</span>
         </span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-trust-section">
+    <div class="shell">
+      <div class="home-trust-heading">
+        <p class="eyebrow">OUR EDITORIAL STANDARD</p>
+        <h2>Advice should be useful, honest and understandable.</h2>
+      </div>
+
+      <div class="home-trust-grid">
+        <article>
+          <span class="home-trust-number">01</span>
+          <h3>Accuracy over hype</h3>
+          <p>
+            Technical claims should have evidence.
+            We do not present guesses as verified results.
+          </p>
+        </article>
+
+        <article>
+          <span class="home-trust-number">02</span>
+          <h3>Context matters</h3>
+          <p>
+            Device, Android and game-version limitations
+            should be clear wherever they affect advice.
+          </p>
+        </article>
+
+        <article>
+          <span class="home-trust-number">03</span>
+          <h3>Corrections are welcome</h3>
+          <p>
+            Information can become outdated.
+            Material errors should be corrected transparently.
+          </p>
+        </article>
+      </div>
+
+      <div class="home-trust-footer">
+        <a href="/editorial-standards/" class="home-text-link">
+          Read our editorial standards
+          <span aria-hidden="true">→</span>
+        </a>
+
+        <a href="/corrections/" class="home-text-link">
+          Report an issue
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-closing shell">
+    <div>
+      <p class="eyebrow">KEEP EXPLORING</p>
+      <h2>Find a better way to understand your tech.</h2>
+    </div>
+
+    <div class="home-closing-actions">
+      <a class="home-action-primary" href="/search/">
+        Search the library
+        <span aria-hidden="true">→</span>
+      </a>
+
+      <a class="home-action-secondary" href="/about/">
+        About LUDIVON
       </a>
     </div>
   </section>
 </SiteLayout>
+
+<style>
+  .home-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.85fr);
+    align-items: stretch;
+    gap: clamp(34px, 6vw, 76px);
+    padding-block: 76px 88px;
+  }
+
+  .home-intro-copy {
+    align-self: center;
+    padding-block: 12px;
+  }
+
+  .home-intro-copy h1 {
+    max-width: 690px;
+    margin: 0;
+    font-size: clamp(3rem, 6.2vw, 5.4rem);
+    font-weight: 820;
+    letter-spacing: -0.075em;
+    line-height: 1.01;
+  }
+
+  .home-intro-copy h1 span {
+    display: block;
+    color: var(--color-teal);
+  }
+
+  .home-intro-description {
+    max-width: 570px;
+    margin: 25px 0 0;
+    color: var(--color-muted);
+    font-size: 1.08rem;
+    line-height: 1.85;
+  }
+
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .home-action-primary,
+  .home-action-secondary {
+    display: inline-flex;
+    min-height: 49px;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+    padding: 11px 18px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .home-action-primary {
+    background: var(--color-teal);
+    color: white;
+  }
+
+  .home-action-primary:hover {
+    background: var(--color-hover);
+    color: white;
+  }
+
+  .home-action-secondary {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .home-action-secondary:hover {
+    border-color: var(--color-teal);
+    color: var(--color-teal);
+  }
+
+  .home-intro-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 38px;
+  }
+
+  .home-intro-note p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.83rem;
+  }
+
+  .home-note-marker {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--color-amber);
+  }
+
+  .home-editorial-panel {
+    display: flex;
+    min-height: 485px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px 29px 21px;
+    border-radius: 5px;
+    background: var(--color-ink);
+    color: white;
+  }
+
+  .home-panel-topline,
+  .home-panel-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    color: #AEBBC6;
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.11em;
+  }
+
+  .home-panel-main {
+    max-width: 430px;
+    padding-block: 38px;
+  }
+
+  .home-panel-overline {
+    margin: 0 0 17px;
+    color: var(--color-amber);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .home-panel-main h2 {
+    margin: 0;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 780;
+    letter-spacing: -0.055em;
+    line-height: 1.12;
+  }
+
+  .home-panel-main > p:last-child {
+    max-width: 390px;
+    margin: 19px 0 0;
+    color: #D2DAE1;
+    font-size: 0.94rem;
+    line-height: 1.75;
+  }
+
+  .home-panel-principles {
+    display: grid;
+    gap: 0;
+    margin-bottom: 30px;
+    border-top: 1px solid #43515E;
+  }
+
+  .home-panel-principles > div {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding-block: 12px;
+    border-bottom: 1px solid #43515E;
+  }
+
+  .home-panel-principles span {
+    color: var(--color-amber);
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .home-panel-principles p {
+    margin: 0;
+    color: #F0F3F6;
+    font-size: 0.87rem;
+    font-weight: 600;
+  }
+
+  .home-library-section {
+    padding-block: 68px 80px;
+    border-block: 1px solid var(--color-border);
+    background: #EFF2F4;
+  }
+
+  .home-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+
+  .home-section-heading .eyebrow {
+    margin-bottom: 10px;
+  }
+
+  .home-section-heading h2 {
+    margin: 0;
+    font-size: clamp(1.9rem, 3.8vw, 2.8rem);
+    letter-spacing: -0.055em;
+    line-height: 1.14;
+  }
+
+  .home-section-description {
+    max-width: 390px;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.94rem;
+  }
+
+  .home-text-link {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    gap: 13px;
+    color: var(--color-teal);
+    font-size: 0.88rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .home-text-link:hover {
+    color: var(--color-hover);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .home-article-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .home-article-card {
+    display: flex;
+    min-height: 285px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border: 1px solid #D7DEE4;
+    border-radius: 4px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .home-article-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-teal);
+    color: var(--color-ink);
+  }
+
+  .home-article-card-featured {
+    grid-column: span 2;
+    min-height: 320px;
+    padding: 29px 31px;
+    background: var(--color-ink);
+    color: white;
+  }
+
+  .home-article-card-featured:hover {
+    border-color: var(--color-amber);
+    color: white;
+  }
+
+  .home-article-card-top,
+  .home-article-card-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .home-article-number {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  .home-article-card-featured .home-article-number {
+    color: var(--color-amber);
+  }
+
+  .home-article-section {
+    color: var(--color-teal);
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  .home-article-card-featured .home-article-section {
+    color: var(--color-amber);
+  }
+
+  .home-article-card-content {
+    max-width: 690px;
+    margin-block: 26px;
+  }
+
+  .home-article-type {
+    margin: 0 0 10px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .home-article-card-featured .home-article-type {
+    color: #B9C6D0;
+  }
+
+  .home-article-card h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.7vw, 2rem);
+    letter-spacing: -0.045em;
+    line-height: 1.18;
+  }
+
+  .home-article-card:not(.home-article-card-featured) h3 {
+    font-size: 1.3rem;
+  }
+
+  .home-article-description {
+    margin: 12px 0 0;
+    color: var(--color-muted);
+    font-size: 0.91rem;
+    line-height: 1.7;
+  }
+
+  .home-article-card-featured .home-article-description {
+    color: #D3DCE4;
+    font-size: 1rem;
+  }
+
+  .home-article-card-bottom {
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: 0.76rem;
+  }
+
+  .home-article-card-featured .home-article-card-bottom {
+    border-color: #46535F;
+    color: #B9C6D0;
+  }
+
+  .home-article-read {
+    color: var(--color-teal);
+    font-size: 0.82rem;
+    font-weight: 750;
+  }
+
+  .home-article-card-featured .home-article-read {
+    color: var(--color-amber);
+  }
+
+  .home-library-empty {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 27px;
+    padding: 35px;
+    border: 1px solid #D7DEE4;
+    border-radius: 4px;
+    background: var(--color-surface);
+  }
+
+  .home-empty-index {
+    align-self: start;
+    color: var(--color-teal);
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.07em;
+  }
+
+  .home-empty-content {
+    max-width: 590px;
+  }
+
+  .home-empty-content .eyebrow {
+    margin-bottom: 9px;
+  }
+
+  .home-empty-content h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    letter-spacing: -0.04em;
+  }
+
+  .home-empty-content > p:not(.eyebrow) {
+    margin: 11px 0 14px;
+    color: var(--color-muted);
+    font-size: 0.93rem;
+    line-height: 1.7;
+  }
+
+  .home-empty-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--color-muted);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .home-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-amber);
+  }
+
+  .home-categories {
+    padding-block: 78px 88px;
+  }
+
+  .home-category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .home-category-card {
+    display: flex;
+    min-height: 310px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 26px 28px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .home-category-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-teal);
+    color: var(--color-ink);
+  }
+
+  .home-category-game {
+    background: #F1F4F5;
+  }
+
+  .home-category-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .home-category-index {
+    color: var(--color-teal);
+    font-size: 0.8rem;
+    font-weight: 850;
+  }
+
+  .home-category-count {
+    color: var(--color-muted);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+  }
+
+  .home-category-kicker {
+    margin: 0 0 10px;
+    color: var(--color-teal);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  .home-category-card h3 {
+    margin: 0;
+    font-size: clamp(1.7rem, 3vw, 2.25rem);
+    letter-spacing: -0.055em;
+  }
+
+  .home-category-card > div:nth-child(2) > p:last-child {
+    max-width: 430px;
+    margin: 12px 0 0;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  .home-category-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    color: var(--color-teal);
+    font-size: 0.87rem;
+    font-weight: 800;
+  }
+
+  .home-trust-section {
+    padding-block: 72px 62px;
+    background: var(--color-ink);
+    color: white;
+  }
+
+  .home-trust-heading {
+    max-width: 700px;
+  }
+
+  .home-trust-heading .eyebrow {
+    color: var(--color-amber);
+  }
+
+  .home-trust-heading h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    letter-spacing: -0.06em;
+    line-height: 1.15;
+  }
+
+  .home-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    margin-top: 46px;
+  }
+
+  .home-trust-grid article {
+    padding-top: 19px;
+    border-top: 1px solid #485560;
+  }
+
+  .home-trust-number {
+    color: var(--color-amber);
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .home-trust-grid h3 {
+    margin: 16px 0 8px;
+    font-size: 1.15rem;
+    letter-spacing: -0.025em;
+  }
+
+  .home-trust-grid p {
+    max-width: 310px;
+    margin: 0;
+    color: #CBD4DC;
+    font-size: 0.89rem;
+    line-height: 1.75;
+  }
+
+  .home-trust-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 40px;
+    padding-top: 23px;
+    border-top: 1px solid #485560;
+  }
+
+  .home-trust-footer .home-text-link {
+    color: var(--color-amber);
+  }
+
+  .home-trust-footer .home-text-link:hover {
+    color: white;
+  }
+
+  .home-closing {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding-block: 65px 78px;
+  }
+
+  .home-closing .eyebrow {
+    margin-bottom: 9px;
+  }
+
+  .home-closing h2 {
+    max-width: 650px;
+    margin: 0;
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    letter-spacing: -0.05em;
+    line-height: 1.18;
+  }
+
+  .home-closing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .home-intro {
+      grid-template-columns: 1fr;
+      gap: 38px;
+      padding-block: 55px 65px;
+    }
+
+    .home-editorial-panel {
+      min-height: 430px;
+    }
+
+    .home-library-empty {
+      grid-template-columns: 55px minmax(0, 1fr);
+    }
+
+    .home-empty-status {
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .home-intro {
+      padding-block: 42px 52px;
+    }
+
+    .home-intro-copy h1 {
+      font-size: clamp(2.8rem, 12vw, 4rem);
+    }
+
+    .home-intro-description {
+      font-size: 1rem;
+    }
+
+    .home-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .home-action-primary,
+    .home-action-secondary {
+      width: 100%;
+    }
+
+    .home-editorial-panel {
+      min-height: 430px;
+      padding: 21px;
+    }
+
+    .home-panel-main h2 {
+      font-size: 2.15rem;
+    }
+
+    .home-library-section {
+      padding-block: 53px 60px;
+    }
+
+    .home-section-heading {
+      display: block;
+    }
+
+    .home-section-heading > .home-text-link,
+    .home-section-description {
+      margin-top: 13px;
+    }
+
+    .home-article-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-article-card-featured {
+      grid-column: auto;
+    }
+
+    .home-article-card,
+    .home-article-card-featured {
+      min-height: 270px;
+      padding: 21px;
+    }
+
+    .home-library-empty {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 25px;
+    }
+
+    .home-empty-index {
+      font-size: 1.8rem;
+    }
+
+    .home-empty-status {
+      grid-column: auto;
+      margin-top: 5px;
+    }
+
+    .home-categories {
+      padding-block: 58px 65px;
+    }
+
+    .home-category-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-category-card {
+      min-height: 270px;
+      padding: 23px;
+    }
+
+    .home-trust-section {
+      padding-block: 57px 48px;
+    }
+
+    .home-trust-grid {
+      grid-template-columns: 1fr;
+      gap: 25px;
+      margin-top: 34px;
+    }
+
+    .home-trust-grid article {
+      padding-top: 16px;
+    }
+
+    .home-trust-footer {
+      gap: 7px 18px;
+      margin-top: 30px;
+    }
+
+    .home-closing {
+      align-items: stretch;
+      flex-direction: column;
+      padding-block: 52px 60px;
+    }
+
+    .home-closing-actions {
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-action-primary,
+    .home-action-secondary,
+    .home-article-card,
+    .home-category-card {
+      transition: none;
+    }
+
+    .home-article-card:hover,
+    .home-category-card:hover {
+      transform: none;
+    }
+  }
+</style>
