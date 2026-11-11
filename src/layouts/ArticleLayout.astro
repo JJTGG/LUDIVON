@@ -1,16 +1,26 @@
 ---
 import { getEntry, type CollectionEntry } from "astro:content";
 import SiteLayout from "./SiteLayout.astro";
+import type { ArticleEntry } from "../lib/related-articles";
 
-type ArticleEntry =
-  | CollectionEntry<"androidGaming">
-  | CollectionEntry<"gameGuides">;
+interface ArticleHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 
 interface Props {
   entry: ArticleEntry;
+  headings: ArticleHeading[];
+  relatedArticles: ArticleEntry[];
 }
 
-const { entry } = Astro.props;
+const {
+  entry,
+  headings,
+  relatedArticles
+} = Astro.props;
+
 const article = entry.data;
 
 const author = await getEntry(article.authorId);
@@ -55,6 +65,16 @@ const sectionTitle =
   article.section === "android-gaming"
     ? "Android Gaming"
     : "Game Guides";
+
+const tableOfContentsHeadings = headings.filter(
+  (heading) => heading.depth === 2 || heading.depth === 3
+);
+
+const levelTwoHeadingCount = headings.filter(
+  (heading) => heading.depth === 2
+).length;
+
+const showTableOfContents = levelTwoHeadingCount >= 3;
 ---
 
 <SiteLayout
@@ -173,6 +193,22 @@ const sectionTitle =
       </dl>
     )}
 
+    {showTableOfContents && (
+      <nav class="article-toc" aria-labelledby="article-toc-heading">
+        <h2 id="article-toc-heading">In this guide</h2>
+
+        <ol>
+          {tableOfContentsHeadings.map((heading) => (
+            <li class={heading.depth === 3 ? "toc-subheading" : undefined}>
+              <a href={`#${heading.slug}`}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+
     <aside class="testing-disclosure">
       <strong>Testing and verification</strong>
       <p>{article.testingDisclosure}</p>
@@ -199,6 +235,37 @@ const sectionTitle =
             </li>
           ))}
         </ol>
+      </section>
+    )}
+
+    {relatedArticles.length > 0 && (
+      <section class="related-guides" aria-labelledby="related-guides-heading">
+        <div class="related-guides-heading">
+          <p class="eyebrow">Continue exploring</p>
+          <h2 id="related-guides-heading">Related guides</h2>
+        </div>
+
+        <div class="related-guide-grid">
+          {relatedArticles.map((relatedArticle) => (
+            <a
+              class="related-guide-card"
+              href={`/${relatedArticle.data.section}/${relatedArticle.id}/`}
+            >
+              <span class="related-guide-meta">
+                {relatedArticle.data.game ??
+                  formatLabel(relatedArticle.data.contentType)}
+              </span>
+
+              <h3>{relatedArticle.data.title}</h3>
+
+              <p>{relatedArticle.data.description}</p>
+
+              <span class="related-guide-link">
+                Read guide &rarr;
+              </span>
+            </a>
+          ))}
+        </div>
       </section>
     )}
   </article>
@@ -289,10 +356,140 @@ const sectionTitle =
     overflow-wrap: anywhere;
   }
 
-  @media (max-width: 480px) {
+  .article-toc {
+    margin-block: 30px;
+    padding: 22px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+  }
+
+  .article-toc h2 {
+    margin: 0;
+    font-size: 1.08rem;
+    letter-spacing: -0.02em;
+  }
+
+  .article-toc ol {
+    display: grid;
+    gap: 9px;
+    margin: 16px 0 0;
+    padding-left: 22px;
+  }
+
+  .article-toc li {
+    padding-left: 3px;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+  }
+
+  .article-toc li::marker {
+    color: var(--color-teal);
+    font-weight: 700;
+  }
+
+  .article-toc .toc-subheading {
+    margin-left: 18px;
+    font-size: 0.88rem;
+  }
+
+  .article-toc a {
+    color: var(--color-link);
+    text-decoration: none;
+    text-underline-offset: 3px;
+  }
+
+  .article-toc a:hover {
+    color: var(--color-hover);
+    text-decoration: underline;
+  }
+
+  .related-guides {
+    margin-top: 54px;
+    padding-top: 30px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .related-guides-heading .eyebrow {
+    margin-bottom: 8px;
+  }
+
+  .related-guides-heading h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: -0.045em;
+  }
+
+  .related-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .related-guide-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 21px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .related-guide-card:hover {
+    border-color: var(--color-teal);
+    background: #FBFCFC;
+    color: var(--color-ink);
+  }
+
+  .related-guide-meta {
+    color: var(--color-muted);
+    font-size: 0.76rem;
+    font-weight: 750;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  .related-guide-card h3 {
+    margin: 12px 0 7px;
+    font-size: 1.12rem;
+    letter-spacing: -0.025em;
+    line-height: 1.35;
+  }
+
+  .related-guide-card p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .related-guide-link {
+    margin-top: 17px;
+    color: var(--color-teal);
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  @media (max-width: 640px) {
     .article-applicability > div {
       grid-template-columns: 1fr;
       gap: 3px;
+    }
+
+    .article-toc {
+      padding: 19px;
+    }
+
+    .related-guide-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
