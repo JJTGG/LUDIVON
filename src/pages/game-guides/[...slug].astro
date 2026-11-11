@@ -1,27 +1,44 @@
 ---
 import { getCollection, render } from "astro:content";
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
+import { getRelatedArticles } from "../../lib/related-articles";
 
 export async function getStaticPaths() {
-  const articles = await getCollection(
-    "gameGuides",
-    ({ data }) => data.status === "published"
-  );
+  const [androidArticles, gameArticles] = await Promise.all([
+    getCollection(
+      "androidGaming",
+      ({ data }) => data.status === "published"
+    ),
+    getCollection(
+      "gameGuides",
+      ({ data }) => data.status === "published"
+    )
+  ]);
 
-  return articles.map((entry) => ({
+  const allArticles = [
+    ...androidArticles,
+    ...gameArticles
+  ];
+
+  return gameArticles.map((entry) => ({
     params: {
       slug: entry.id
     },
     props: {
-      entry
+      entry,
+      relatedArticles: getRelatedArticles(entry, allArticles)
     }
   }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { entry, relatedArticles } = Astro.props;
+const { Content, headings } = await render(entry);
 ---
 
-<ArticleLayout entry={entry}>
+<ArticleLayout
+  entry={entry}
+  headings={headings}
+  relatedArticles={relatedArticles}
+>
   <Content />
 </ArticleLayout>
